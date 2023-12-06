@@ -31,6 +31,11 @@ class Vm {
     while (true) {
       var inst = readOpcode();
       switch (inst) {
+        // Single Operand commands
+        case OpCode.opAbs:
+        case OpCode.opMove:
+          handleSingleOp(inst);
+        // Dual Operand Commands
         case OpCode.opAdd:
         case OpCode.opSubtract:
         case OpCode.opMultiply:
@@ -42,8 +47,6 @@ class Vm {
         case OpCode.opStoreLt:
           handleBinaryOp(inst);
           break;
-        case OpCode.opMove:
-          moveOp();
         default:
           return InterpreterResult.compileError;
       }
@@ -72,6 +75,17 @@ class Vm {
     };
   }
 
+  void handleSingleOp(OpCode opCode) {
+    var dest = _readByte();
+    var val = readValue();
+
+    registers[dest] = switch(opCode) {
+      OpCode.opMove => val,
+      OpCode.opAbs => val.abs(),
+      _ => throw StateError('Should not reach here')
+    };
+  }
+
   void handleBinaryOp(OpCode opCode) {
     var dest = _readByte();
     var val1 = readValue();
@@ -89,12 +103,6 @@ class Vm {
       OpCode.opStoreLt => val1 < val2 ? 1 : 0,
       _ => throw StateError("Don't get here"),
     };
-  }
-
-  void moveOp() {
-    var dest = _readByte();
-    var val = readValue();
-    registers[dest] = val;
   }
 
 }

@@ -5,7 +5,10 @@ import 'src/value.dart';
 enum OpCode {
   opConstant,
   opRegister,
+  // Single Operand
+  opAbs,
   opMove,
+  // Dual Operand
   opAdd,
   opSubtract,
   opMultiply,

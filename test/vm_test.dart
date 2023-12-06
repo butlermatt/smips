@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:test/test.dart';
 
 import 'package:smips/chunk.dart';
@@ -5,6 +8,30 @@ import 'package:smips/vm.dart';
 
 void main() {
   group('OpCode Tests', () {
+    test('Abs', () {
+      /*
+      * abs r0 2
+      * abs r1 -3
+      */
+
+      Chunk c = Chunk();
+      int pos = c.addConstant(2, (0, 2));
+      c..writeCode(OpCode.opAbs, (0, 0))
+        ..write(0)
+        ..writeCode(OpCode.opConstant, (0, 2))
+        ..write(pos);
+      pos = c.addConstant(-3, (1, 2));
+      c..writeCode(OpCode.opAbs, (1, 0))
+        ..write(1)
+        ..writeCode(OpCode.opConstant, (1, 2))
+        ..write(pos);
+
+      var vm = Vm();
+      vm.interpret(c);
+
+      expect(vm.registers[0], equals(2));
+      expect(vm.registers[1], equals(3));
+    });
     test('Move', () {
       /*
        * move r0 1.2 # Constant
@@ -200,7 +227,7 @@ void main() {
 
       var vm = Vm();
       vm.interpret(c);
-      expect(vm.registers[0], equals(0));
+      expect(vm.registers[0], equals(1));
       expect(vm.registers[1], equals(1));
     });
     test('Store Not Equals Zero', () {
