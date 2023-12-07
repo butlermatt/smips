@@ -3,8 +3,6 @@ import 'dart:typed_data';
 import 'src/value.dart';
 
 enum OpCode {
-  opConstant,
-  opRegister,
   // Single Operand
   opAbs,
   opMove,
@@ -18,6 +16,9 @@ enum OpCode {
   opStoreLt,
   opStoreEq,
   opStoreNotEq,
+  // Misc Opcodes
+  opConstant,
+  opRegister,
 }
 
 typedef Position = (int line, int char);
@@ -31,6 +32,7 @@ class Chunk {
  
   Chunk() {
     values.add(0);
+    values.add(1);
   }
 
   void write(int byte) {

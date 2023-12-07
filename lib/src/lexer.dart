@@ -3,15 +3,17 @@ import 'token.dart';
 export 'token.dart' show Token, TokenType;
 
 class Lexer {
-  static final List<int> _reserved = '09AF#\$% \t\r\n'.codeUnits;
+  static final List<int> _reserved = '019AF#\$%.'.codeUnits;
   static final List<int> _whiteSpace = '\n\r\t '.codeUnits;
   static int get digit0 => _reserved[0];
-  static int get digit9 => _reserved[1];
-  static int get alphaA => _reserved[2];
-  static int get alphaF => _reserved[3];
-  static int get charHash => _reserved[4];
-  static int get charDollar => _reserved[5];
-  static int get charPerc => _reserved[6];
+  static int get digit1 => _reserved[1];
+  static int get digit9 => _reserved[2];
+  static int get alphaA => _reserved[3];
+  static int get alphaF => _reserved[4];
+  static int get charHash => _reserved[5];
+  static int get charDollar => _reserved[6];
+  static int get charPerc => _reserved[7];
+  static int get charDot => _reserved[8];
   static int get charNewLine => _whiteSpace[0];
 
   late final List<int> input;
@@ -19,24 +21,31 @@ class Lexer {
   int current = 0;
   int line = 1;
   int linePos = 1;
+  int startPos = 1;
 
   static final RegExp hexNum = RegExp(r'(\d|[A-F])');
   static final RegExp digitNum = RegExp(r'(\d)');
 
-  Lexer(String input)  {
+  Lexer(String input) {
     this.input = input.codeUnits;
   }
 
   Token scanToken() {
     _consumeWhitespace();
     start = current;
+    startPos = linePos;
 
     if (_isAtEnd()) {
       return _makeToken(TokenType.eof);
     }
 
     var c = _advance();
-    switch (c) {
+    if (_isDigit(c)) {
+      return _number();
+    }
+
+    var cs = String.fromCharCode(c);
+    switch (cs) {
       // case '(':
       //   return _makeToken(TokenType.leftParen);
       // case ')':
@@ -46,7 +55,7 @@ class Lexer {
       case r'$':
         return _hexNumber();
       case r'%':
-        return _binNumber(); 
+        return _binNumber();
     }
 
     return _errorToken('Unexpected character');
@@ -59,25 +68,29 @@ class Lexer {
   }
 
   int _peek() {
+    if (current >= input.length) return 0;
     return input[current];
   }
 
   void _consumeWhitespace() {
     while (true) {
-      var c = _peek();
+      var c = String.fromCharCode(_peek());
       switch (c) {
+        case '\n':
+          linePos = 1;
+          line++;
+          _advance();
+          break;
         case ' ':
         case '\r':
         case '\t':
           _advance();
           break;
         case '#':
-          while (_peek() != '\n' && !_isAtEnd()) { _advance(); }
+          while (_peek() != charNewLine && !_isAtEnd()) {
+            _advance();
+          }
           break;
-        case '\n':
-          linePos = 0;
-          line++;
-          _advance();
         default:
           return;
       }
@@ -92,17 +105,17 @@ class Lexer {
     return (c >= digit0 && c <= digit9) || (c >= alphaA && c <= alphaF);
   }
 
-  static bool _isBinDigit(String c) {
-    return c == '0' || c == '1';
+  static bool _isBinDigit(int c) {
+    return c == digit0 || c == digit1;
   }
 
-  static bool _isDigit(String c) {
-    return int.tryParse(c) != null;
+  static bool _isDigit(int c) {
+    return c >= digit0 && c <= digit9;
   }
 
   Token _makeToken(TokenType type) =>
-      Token(type, String.fromCharCodes(input, start, current), line, linePos);
-      //Token(type, input[line].substring(start, current), line + 1, start + 1);
+      Token(type, String.fromCharCodes(input, start, current), line, startPos);
+  //Token(type, input[line].substring(start, current), line + 1, start + 1);
 
   Token _errorToken(String message) =>
       Token(TokenType.error, message, line + 1, start + 1);
@@ -137,6 +150,25 @@ class Lexer {
     while (_isBinDigit(c) && !_isAtEnd()) {
       _advance();
       c = _peek();
+    }
+
+    return _makeToken(TokenType.number);
+  }
+
+  Token _number() {
+    var c = _peek();
+    while (_isDigit(c) && !_isAtEnd()) {
+      _advance();
+      c = _peek();
+    }
+
+    if (c == charDot) {
+      _advance();
+      c = _peek();
+      while (_isDigit(c) && !_isAtEnd()) {
+        _advance();
+        c = _peek();
+      }
     }
 
     return _makeToken(TokenType.number);
