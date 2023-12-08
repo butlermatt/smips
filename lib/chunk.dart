@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'src/value.dart';
 
 enum OpCode {
+  opNop,
   // Single Operand
   opAbs,
   opMove,
@@ -16,7 +17,15 @@ enum OpCode {
   opStoreLt,
   opStoreEq,
   opStoreNotEq,
+  // Stack Handling
+  opPeek,
+  opPop,
+  opPush,
+  // Movement
+  opBranch,
+  opJump,
   // Misc Opcodes
+  opRand,
   opConstant,
   opRegister,
 }
@@ -24,30 +33,32 @@ enum OpCode {
 typedef Position = (int line, int char);
 
 class Chunk {
-  BytesBuilder _builder = BytesBuilder();
-  List<Value> values = List<Value>.empty(growable: true);
-  List<Position> positions = List<Position>.empty(growable: true);
-  List<int> lines = List<int>.filled(128, 0);
+  final BytesBuilder _builder = BytesBuilder();
+  final List<Value> values = <Value>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+  final List<int> lines = List<int>.filled(128, -1);
 
   Uint8List? data;
  
-  Chunk() {
-    values.add(0);
-    values.add(1);
-  }
+  Chunk();
 
   void write(int byte) {
     _builder.addByte(byte);
   }
 
-  void writeCode(OpCode code, Position pos) {
+  void writeCode(OpCode code, int line) {
+    if (lines[line] < 0) {
+      lines[line] = _builder.length;
+    }
     _builder.addByte(code.index);
-    positions.add(pos);
   }
 
-  int addConstant(Value value, Position pos) {
+  int addConstant(Value value) {
+    if (value is int)  {
+      if (value >= 0 && value <= 17) {
+        return value;
+      }
+    }
     values.add(value);
-    positions.add(pos);
     return values.length - 1;
   }
 

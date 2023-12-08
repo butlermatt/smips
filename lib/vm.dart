@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'chunk.dart';
 import 'src/value.dart';
 
@@ -59,10 +57,19 @@ class Vm {
 
   int _readByte() => chunk!.data![ip++];
 
-  Value _readConstant() => chunk!.values[_readByte()];
+  Value _readConstant() {
+    var val = _readByte();
+    if (chunk!.values.length < val) {
+      throw IndexError.withLength(val, chunk!.values.length);
+    }
+    return chunk!.values[val];
+  }
   Value _readRegister() {
-    // TODO: Check for a register pointed (eg: rrr0)
-    return registers[_readByte()]; 
+    Value val = readValue();
+    if (val is! int) {
+      throw ArgumentError('Register must be integer, got: $val');
+    }
+    return registers[val]; 
   }
 
   Value readValue() {
@@ -75,7 +82,7 @@ class Vm {
   }
 
   void handleSingleOp(OpCode opCode) {
-    var dest = _readByte();
+    var dest = readValue() as int;
     var val = readValue();
 
     registers[dest] = switch(opCode) {
@@ -86,7 +93,7 @@ class Vm {
   }
 
   void handleBinaryOp(OpCode opCode) {
-    var dest = _readByte();
+    var dest = readValue() as int;
     var val1 = readValue();
     var val2 = readValue();
 
