@@ -3,7 +3,7 @@ import 'token.dart';
 export 'token.dart' show Token, TokenType;
 
 class Lexer {
-  static final List<int> _reserved = '019AF#\$%.'.codeUnits;
+  static final List<int> _reserved = '019AF#\$%."'.codeUnits;
   static final List<int> _whiteSpace = '\n\r\t '.codeUnits;
   static int get digit0 => _reserved[0];
   static int get digit1 => _reserved[1];
@@ -14,6 +14,7 @@ class Lexer {
   static int get charDollar => _reserved[6];
   static int get charPerc => _reserved[7];
   static int get charDot => _reserved[8];
+  static int get charQuote => _reserved[9];
   static int get charNewLine => _whiteSpace[0];
 
   late final List<int> input;
@@ -122,12 +123,12 @@ class Lexer {
 
   Token _hashString() {
     int c = _peek();
-    while (c != '"' && c != '\n' && !_isAtEnd()) {
+    while (c != charQuote && c != charNewLine && !_isAtEnd()) {
       _advance();
       c = _peek();
     }
 
-    if (c == '\n' || _isAtEnd()) {
+    if (c == charNewLine || _isAtEnd()) {
       return _errorToken('Unterminated string');
     }
 
