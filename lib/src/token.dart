@@ -30,7 +30,6 @@ enum TokenType {
   not,
   sin,
 
-
   // Jumping execution
   branch,
   branchRelative,

@@ -9,7 +9,6 @@ enum InterpreterResult {
 
 class Vm {
   Chunk? chunk;
-  Uint8List? data;
   List<num> registers = List<num>.filled(18, 0);
   List<num> stack = List<num>.filled(512, 0);
   int ip = 0;

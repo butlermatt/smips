@@ -23,10 +23,7 @@ class Lexer {
   int line = 1;
   int linePos = 1;
   int startPos = 1;
-
-  static final RegExp hexNum = RegExp(r'(\d|[A-F])');
-  static final RegExp digitNum = RegExp(r'(\d)');
-
+  
   Lexer(String input) {
     this.input = input.codeUnits;
   }
@@ -74,27 +71,28 @@ class Lexer {
   }
 
   void _consumeWhitespace() {
-    while (true) {
-      var c = String.fromCharCode(_peek());
-      switch (c) {
-        case '\n':
-          linePos = 1;
-          line++;
-          _advance();
-          break;
-        case ' ':
-        case '\r':
-        case '\t':
-          _advance();
-          break;
-        case '#':
-          while (_peek() != charNewLine && !_isAtEnd()) {
-            _advance();
-          }
-          break;
-        default:
-          return;
+    while (!_isAtEnd()) {
+      var c = _peek();
+      if (c == charNewLine) {
+        _advance();
+        line++;
+        linePos = 1;
+        continue;
       }
+
+      if (_isWhitespace(c)) {
+        _advance();
+        continue;
+      }
+
+      if (c == charHash) {
+        while(_peek() != charNewLine && !_isAtEnd()) {
+          _advance();
+        }
+        continue;
+      }
+
+      break;
     }
   }
 
@@ -112,6 +110,10 @@ class Lexer {
 
   static bool _isDigit(int c) {
     return c >= digit0 && c <= digit9;
+  }
+
+  static bool _isWhitespace(int c) {
+    return _whiteSpace.contains(c);
   }
 
   Token _makeToken(TokenType type) =>

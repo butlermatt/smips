@@ -27,6 +27,7 @@ class Chunk {
   BytesBuilder _builder = BytesBuilder();
   List<Value> values = List<Value>.empty(growable: true);
   List<Position> positions = List<Position>.empty(growable: true);
+  List<int> lines = List<int>.filled(128, 0);
 
   Uint8List? data;
  
