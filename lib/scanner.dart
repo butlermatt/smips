@@ -39,6 +39,10 @@ class Scanner {
         chunk.writeCode(OpCode.opAdd, curLine - 1);
         _parseRegValueValue(words.sublist(1));
         break;
+      case 'sgt':
+        chunk.writeCode(OpCode.opStoreGt, curLine - 1);
+        _parseRegValueValue(words.sublist(1));
+        break;
     }
   }
 
@@ -89,7 +93,7 @@ class Scanner {
     } else {
       number = num.parse(value);
     }
-    
+
     var pos = chunk.addConstant(number);
     chunk..writeCode(OpCode.opConstant, curLine - 1)
       ..write(pos);
