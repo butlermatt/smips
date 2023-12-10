@@ -58,8 +58,14 @@ class Chunk {
         return value;
       }
     }
-    values.add(value);
-    return values.length - 1;
+
+    var ind = values.indexOf(value);
+    if (ind == -1) {
+      values.add(value);
+      ind = values.length - 1;
+    }
+
+    return ind;
   }
 
   void take() {

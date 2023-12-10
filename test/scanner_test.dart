@@ -57,6 +57,36 @@ void main() {
       expect(s.chunk.data![6], equals(15));
     });
 
+    test('Defines', () {
+      var input ='define TEST 100\nmove r0 TEST';
+      
+      var s = Scanner(input);
+
+      s.scanInstruction();
+      s.scanInstruction();
+      s.chunk.take();
+
+      expect(s.chunk.data!.length, equals(6));
+      expect(s.chunk.data![0], equals(OpCode.opNop.index));
+      expect(s.chunk.data![1], equals(OpCode.opMove.index));
+      expect(s.chunk.data![2], equals(OpCode.opConstant.index));
+      expect(s.chunk.data![3], equals(0));
+      expect(s.chunk.data![4], equals(OpCode.opConstant.index));
+      expect(s.chunk.data![5], equals(18));
+    });
+
+    test('Move', () {
+      var input =  'move r0 1\nmove r1 r0';
+
+      var s = Scanner(input);
+      s.scanInstruction();
+      s.scanInstruction();
+      s.chunk.take();
+
+      expect(s.chunk.data!.length, equals(11));
+      expect(s.chunk.data![0], equals(OpCode.opMove.index));
+    });
+
     test('Invalid Registry throws', (){
       var input = 'add r18 r0 1';
 

@@ -11,6 +11,7 @@ class Scanner {
   static get charR => _chars[1];
 
   late final List<String> lines;
+  final Map<String, int> _defines = <String, int>{};
   int curLine = 0;
   Chunk chunk = Chunk();
 
@@ -20,7 +21,7 @@ class Scanner {
 
   void scanInstruction() {
     if (curLine >= lines.length) return;
-    
+
     String line = lines[curLine++];
     int comment = line.indexOf('#');
     if (comment >= 0) {
@@ -28,13 +29,21 @@ class Scanner {
     }
 
     if (line.isEmpty) {
-      chunk.writeCode(OpCode.opNop, curLine -  1);
+      chunk.writeCode(OpCode.opNop, curLine - 1);
     }
 
     var words = line.split(' ');
     var keyword = words[0].trim();
 
-    switch(keyword) {
+    switch (keyword) {
+      case 'define':
+        chunk.writeCode(OpCode.opNop, curLine - 1);
+        _parseDefine(words.sublist(1));
+        break;
+      case 'move':
+        chunk.writeCode(OpCode.opMove, curLine - 1);
+        _parseRegister(words[1].trim());
+        _parseValue(words[2].trim());
       case 'add':
         chunk.writeCode(OpCode.opAdd, curLine - 1);
         _parseRegValueValue(words.sublist(1));
@@ -46,21 +55,33 @@ class Scanner {
     }
   }
 
+  void _parseDefine(List<String> args) {
+    if (args.length < 2) {
+      throw ArgumentError('Expected 2 arguments but got ${args.length}');
+    }
+
+    var name = args[0].trim();
+    var number = _parseNumber(args[1].trim());
+    var ind = chunk.addConstant(number);
+    _defines[name] = ind;
+  }
+
   void _parseRegValueValue(List<String> args) {
     if (args.length < 3) {
       throw ArgumentError('Expected 3 arguments, but got ${args.length}');
     }
 
-    var reg = args[0].trim();
-    _parseRegister(reg);
-    _parseValue(args[1]);
-    _parseValue(args[2]);
+    _parseRegister(args[0].trim());
+    _parseValue(args[1].trim());
+    _parseValue(args[2].trim());
   }
 
   void _parseRegister(String register) {
     var regCU = register.codeUnits;
-    if (regCU[0] != charR) { //  TODO: Check against aliases before failing
-      throw ArgumentError('Expected destination register to start with "r" but it was $register');
+    if (regCU[0] != charR) {
+      //  TODO: Check against aliases before failing
+      throw ArgumentError(
+          'Expected destination register to start with "r" but it was $register');
     }
 
     var i = 1;
@@ -71,20 +92,41 @@ class Scanner {
 
     var value = int.parse(String.fromCharCodes(regCU, i));
     if (value < 0 || value > 17) {
-      throw ArgumentError('Register value should be between 0 and 17. Got: $value');
+      throw ArgumentError(
+          'Register value should be between 0 and 17. Got: $value');
     }
     chunk.writeCode(OpCode.opConstant, curLine - 1);
     chunk.write(value);
   }
 
   void _parseValue(String value) {
-    // TODO: Check for aliases
+    // TODO: Check for aliases and defines
 
     if (value.startsWith('r')) {
       chunk.writeCode(OpCode.opRegister, curLine - 1);
       return _parseRegister(value);
     }
 
+    num? number;
+    try  {
+      number = _parseNumber(value);
+    } on FormatException {
+      var ind = _defines[value];
+      if (ind == null) {
+        throw ArgumentError('Invalid value $value');
+      }
+
+      chunk..writeCode(OpCode.opConstant, curLine - 1)
+        ..write(ind);
+        return;
+    }
+
+    var pos = chunk.addConstant(number!);
+    chunk..writeCode(OpCode.opConstant, curLine - 1)
+      ..write(pos);
+  }
+
+  num _parseNumber(String value) {
     num number;
     if (value.startsWith('%')) {
       number = int.parse(value.substring(1), radix: 2);
@@ -94,8 +136,6 @@ class Scanner {
       number = num.parse(value);
     }
 
-    var pos = chunk.addConstant(number);
-    chunk..writeCode(OpCode.opConstant, curLine - 1)
-      ..write(pos);
+    return number;
   }
 }

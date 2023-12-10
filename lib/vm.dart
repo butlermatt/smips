@@ -28,6 +28,8 @@ class Vm {
     while (true) {
       var inst = readOpcode();
       switch (inst) {
+        // Used to help manage empty lines
+        case OpCode.opNop: continue;
         // Single Operand commands
         case OpCode.opAbs:
         case OpCode.opMove:
