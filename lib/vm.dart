@@ -79,9 +79,12 @@ class Vm {
     }
     if (val == OpCode.opRegister.index) {
       return registers[_readRegister() as int];
+    } else if (val == OpCode.opConstant.index) {
+      return registers[_readConstant() as int];
     }
 
-    return registers[val]; 
+    // return registers[val]; 
+    throw StateError('Should not reach');
   }
 
   int _readAlias() {
