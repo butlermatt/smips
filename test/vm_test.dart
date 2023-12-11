@@ -1,6 +1,7 @@
 import 'package:test/test.dart';
 
 import 'package:smips/chunk.dart';
+import 'package:smips/scanner.dart';
 import 'package:smips/vm.dart';
 
 void main() {
@@ -258,6 +259,57 @@ void main() {
       vm.interpret(c);
       expect(vm.registers[0], equals(1));
       expect(vm.registers[1], equals(1));
+    });
+  });
+
+  group('Scanner-Based tests', () {
+    test('Register redirection', () {
+
+    });
+    test('Add Test', () {
+      var input = r'add r0 1 2';
+      var scanner = Scanner(input);
+
+      scanner.compile();
+      var vm = Vm();
+      vm.interpret(scanner.chunk);
+
+      expect(vm.registers[0], equals(3));
+    });
+
+    test('Set Alias Register', () {
+      var input = r'alias test r15';
+      var scanner = Scanner(input);
+
+      scanner.compile();
+      var vm = Vm();
+      vm.interpret(scanner.chunk);
+
+      expect(vm.aliases[0][0], equals(OpCode.opRegister.index));
+      expect(vm.aliases[0][1], equals(OpCode.opConstant.index));
+      expect(vm.aliases[0][2], equals(15));
+    });
+
+    test('Move', () {
+      var input = r'move r15 500';
+      var scanner = Scanner(input);
+
+      scanner.compile();
+      var vm = Vm();
+      vm.interpret(scanner.chunk);
+
+      expect(vm.registers[15], equals(500));
+    });
+
+    test('Move to alias', () {
+      var input = 'alias Test r15\nmove Test 500';
+      var scanner = Scanner(input);
+
+      scanner.compile();
+      var vm = Vm();
+      vm.interpret(scanner.chunk);
+
+      expect(vm.registers[15], equals(500));
     });
   });
 }

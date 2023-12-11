@@ -19,6 +19,12 @@ class Scanner {
     lines = input.split('\n');
   }
 
+  void compile() {
+    for(var i = 0; i < lines.length; i++) {
+      scanInstruction();
+    }
+  }
+
   void scanInstruction() {
     if (curLine >= lines.length) return;
 
@@ -36,6 +42,8 @@ class Scanner {
     var keyword = words[0].trim();
 
     switch (keyword) {
+      case 'alias':
+        _parseAlias(words.sublist(1));
       case 'define':
         chunk.writeCode(OpCode.opNop, curLine - 1);
         _parseDefine(words.sublist(1));
@@ -52,6 +60,22 @@ class Scanner {
         chunk.writeCode(OpCode.opStoreGt, curLine - 1);
         _parseRegValueValue(words.sublist(1));
         break;
+    }
+  }
+
+  void _parseAlias(List<String> args) {
+    var ind = chunk.addAlias(args[0].trim());
+    var definition = args[1].trim();
+
+    chunk..writeCode(OpCode.opSetAlias, curLine - 1)
+      ..write(ind);
+
+    if (definition.startsWith(r'r')) {
+      chunk.writeCode(OpCode.opRegister, curLine - 1);
+      _parseRegister(definition);
+    } else if (definition.startsWith(r'd')) {
+      chunk.writeCode(OpCode.opDevice, curLine - 1);
+      _parseDevice(definition);
     }
   }
 
@@ -76,12 +100,36 @@ class Scanner {
     _parseValue(args[2].trim());
   }
 
+  void _parseDevice(String device) {
+    var devCU = device.codeUnits;
+    if (devCU[0] != charD) {
+      throw ArgumentError('Expected device to begin with "d" but it was $device');
+    }
+
+    if (devCU[1] == charR) {
+      chunk.writeCode(OpCode.opRegister, curLine - 1);
+      _parseRegister(device.substring(1));
+      return;
+    }
+
+    var devIndex = int.parse(String.fromCharCodes(devCU, 1));
+    if (devIndex > 5) {
+      throw ArgumentError('Device index must be between 0 and 5');
+    }
+    chunk..writeCode(OpCode.opConstant, curLine - 1)
+      ..write(devIndex);
+  }
+
   void _parseRegister(String register) {
     var regCU = register.codeUnits;
     if (regCU[0] != charR) {
-      //  TODO: Check against aliases before failing
-      throw ArgumentError(
-          'Expected destination register to start with "r" but it was $register');
+      var aliasSlot = chunk.aliases.indexOf(register);
+      if (aliasSlot == -1) {
+        throw ArgumentError('Unknown register "$register"');
+      }
+      chunk..writeCode(OpCode.opGetAlias, curLine - 1)
+        ..write(aliasSlot);
+        return;
     }
 
     var i = 1;
@@ -100,7 +148,12 @@ class Scanner {
   }
 
   void _parseValue(String value) {
-    // TODO: Check for aliases and defines
+    var aliasSlot = chunk.aliases.indexOf(value);
+    if (aliasSlot != -1) {
+      chunk..writeCode(OpCode.opGetAlias, curLine - 1)
+        ..write(aliasSlot);
+        return;
+    }
 
     if (value.startsWith('r')) {
       chunk.writeCode(OpCode.opRegister, curLine - 1);
@@ -121,7 +174,7 @@ class Scanner {
         return;
     }
 
-    var pos = chunk.addConstant(number!);
+    var pos = chunk.addConstant(number);
     chunk..writeCode(OpCode.opConstant, curLine - 1)
       ..write(pos);
   }

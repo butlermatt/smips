@@ -9,6 +9,7 @@ class Vm {
   Chunk? chunk;
   List<num> registers = List<num>.filled(18, 0);
   List<num> stack = List<num>.filled(512, 0);
+  List<List<int>> aliases = [];
   int ip = 0;
 
   Vm();
@@ -46,6 +47,9 @@ class Vm {
         case OpCode.opStoreLt:
           handleBinaryOp(inst);
           break;
+        case OpCode.opSetAlias:
+          setAlias();
+          break;
         default:
           return InterpreterResult.compileError;
       }
@@ -58,6 +62,7 @@ class Vm {
   }
 
   int _readByte() => chunk!.data![ip++];
+  int _peekByte() => chunk!.data![ip];
 
   Value _readConstant() {
     var val = _readByte();
@@ -66,12 +71,38 @@ class Vm {
     }
     return chunk!.values[val];
   }
+
   Value _readRegister() {
-    Value val = readValue();
+    Value val = _readByte();
     if (val is! int) {
       throw ArgumentError('Register must be integer, got: $val');
     }
+    if (val == OpCode.opRegister.index) {
+      return registers[_readRegister() as int];
+    }
+
     return registers[val]; 
+  }
+
+  int _readAlias() {
+    int slot = _readByte();
+
+    if (slot >= aliases.length) {
+      throw StateError('Alias slot higher than number of aliases');
+    }
+
+    var bytes = aliases[slot];
+    return chunk!.values[bytes[2]] as int;
+  }
+
+  int readDestRegistry() {
+    var inst = readOpcode();
+    return switch (inst) {
+      OpCode.opConstant => _readConstant() as int,
+      OpCode.opRegister => _readRegister() as int,
+      OpCode.opGetAlias => _readAlias(),
+      _ => throw StateError('Should not reach here'),
+    };
   }
 
   Value readValue() {
@@ -84,7 +115,7 @@ class Vm {
   }
 
   void handleSingleOp(OpCode opCode) {
-    var dest = readValue() as int;
+    var dest = readDestRegistry();
     var val = readValue();
 
     registers[dest] = switch(opCode) {
@@ -95,7 +126,7 @@ class Vm {
   }
 
   void handleBinaryOp(OpCode opCode) {
-    var dest = readValue() as int;
+    var dest = readDestRegistry();
     var val1 = readValue();
     var val2 = readValue();
 
@@ -113,4 +144,19 @@ class Vm {
     };
   }
 
+  void setAlias() {
+    var aliasSlot = _readByte();
+    OpCode opCode = readOpcode();
+    Value value = readValue();
+
+    if (aliasSlot < aliases.length) {
+      aliases[aliasSlot] = [opCode.index, OpCode.opConstant.index, value as int];
+    }
+
+    if (aliasSlot > aliases.length) {
+      throw StateError('Alias slot does not match next slot value: Expected: ${aliases.length}, got $aliasSlot');
+    }
+
+    aliases.add([opCode.index, OpCode.opConstant.index, value as int]);
+  }
 }

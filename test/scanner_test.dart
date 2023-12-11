@@ -75,6 +75,46 @@ void main() {
       expect(s.chunk.data![5], equals(18));
     });
 
+    test('Set Alias', () {
+      var input = 'alias test r1';
+
+      var s = Scanner(input);
+      s.scanInstruction();
+
+      s.chunk.take();
+
+      expect(s.chunk.aliases.length, equals(1));
+      expect(s.chunk.aliases[0], equals('test'));
+      expect(s.chunk.data![0], equals(OpCode.opSetAlias.index));
+      expect(s.chunk.data![1], equals(0));
+      expect(s.chunk.data![2], equals(OpCode.opRegister.index));
+      expect(s.chunk.data![3], equals(OpCode.opConstant.index));
+      expect(s.chunk.data![4], equals(1));
+    });
+
+    test('Get Alias', () {
+      var input = 'alias Test r15\nmove Test 500';
+
+      var s = Scanner(input);
+      s.scanInstruction();
+      s.scanInstruction();
+
+      s.chunk.take();
+
+      expect(s.chunk.aliases.length, equals(1));
+      expect(s.chunk.aliases[0], equals('Test'));
+      expect(s.chunk.data![0], equals(OpCode.opSetAlias.index));
+      expect(s.chunk.data![1], equals(0));
+      expect(s.chunk.data![2], equals(OpCode.opRegister.index));
+      expect(s.chunk.data![3], equals(OpCode.opConstant.index));
+      expect(s.chunk.data![4], equals(15));
+      expect(s.chunk.data![5], equals(OpCode.opMove.index));
+      expect(s.chunk.data![6], equals(OpCode.opGetAlias.index));
+      expect(s.chunk.data![7], equals(0));
+      expect(s.chunk.data![8], equals(OpCode.opConstant.index));
+      expect(s.chunk.data![9], equals(18));
+    });
+
     test('Move', () {
       var input =  'move r0 1\nmove r1 r0';
 
@@ -85,6 +125,16 @@ void main() {
 
       expect(s.chunk.data!.length, equals(11));
       expect(s.chunk.data![0], equals(OpCode.opMove.index));
+      expect(s.chunk.data![1], equals(OpCode.opConstant.index));
+      expect(s.chunk.data![2], equals(0));
+      expect(s.chunk.data![3], equals(OpCode.opConstant.index));
+      expect(s.chunk.data![4], equals(1));
+      expect(s.chunk.data![5], equals(OpCode.opMove.index));
+      expect(s.chunk.data![6], equals(OpCode.opConstant.index));
+      expect(s.chunk.data![7], equals(1));
+      expect(s.chunk.data![8], equals(OpCode.opRegister.index));
+      expect(s.chunk.data![9], equals(OpCode.opConstant.index));
+      expect(s.chunk.data![10], equals(0));
     });
 
     test('Invalid Registry throws', (){

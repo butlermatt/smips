@@ -17,6 +17,8 @@ enum OpCode {
   opStoreLt,
   opStoreEq,
   opStoreNotEq,
+  opSetAlias, // opCode AliasSlot Value(Register | Constant)
+  opGetAlias, // opCode AliasSlot
   // Stack Handling
   opPeek,
   opPop,
@@ -27,6 +29,7 @@ enum OpCode {
   // Misc Opcodes
   opRand,
   opConstant,
+  opDevice,
   opRegister,
 }
 
@@ -36,6 +39,7 @@ class Chunk {
   final BytesBuilder _builder = BytesBuilder();
   final List<Value> values = <Value>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
   final List<int> lines = List<int>.filled(128, -1);
+  final List<String> aliases = <String>[];
 
   Uint8List? data;
  
@@ -63,6 +67,16 @@ class Chunk {
     if (ind == -1) {
       values.add(value);
       ind = values.length - 1;
+    }
+
+    return ind;
+  }
+
+  int addAlias(String alias) {
+    var ind = aliases.indexOf(alias);
+    if (ind == -1) {
+      ind = aliases.length;
+      aliases.add(alias);
     }
 
     return ind;
