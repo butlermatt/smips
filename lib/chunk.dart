@@ -6,17 +6,24 @@ enum OpCode {
   opNop,
   // Single Operand
   opAbs,
+  opCeil,
+  opFloor,
   opMove,
   // Dual Operand
   opAdd,
-  opSubtract,
-  opMultiply,
+  opAnd,
   opDivide,
+  opSubtract,
+  opMax,
+  opMin,
+  opMultiply,
   opMod,
+  opOr,
   opStoreGt,
   opStoreLt,
   opStoreEq,
   opStoreNotEq,
+  // Aliases
   opSetAlias, // opCode AliasSlot Value(Register | Constant)
   opGetAlias, // opCode AliasSlot
   // Stack Handling

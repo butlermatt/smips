@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'chunk.dart';
 import 'src/value.dart';
 
@@ -33,14 +35,20 @@ class Vm {
         case OpCode.opNop: continue;
         // Single Operand commands
         case OpCode.opAbs:
+        case OpCode.opCeil:
+        case OpCode.opFloor:
         case OpCode.opMove:
           handleSingleOp(inst);
         // Dual Operand Commands
         case OpCode.opAdd:
+        case OpCode.opAnd:
         case OpCode.opSubtract:
         case OpCode.opMultiply:
         case OpCode.opDivide:
         case OpCode.opMod:
+        case OpCode.opMax:
+        case OpCode.opMin:
+        case OpCode.opOr:
         case OpCode.opStoreEq:
         case OpCode.opStoreNotEq:
         case OpCode.opStoreGt:
@@ -62,7 +70,6 @@ class Vm {
   }
 
   int _readByte() => chunk!.data![ip++];
-  int _peekByte() => chunk!.data![ip];
 
   Value _readConstant() {
     var val = _readByte();
@@ -123,6 +130,8 @@ class Vm {
 
     registers[dest] = switch(opCode) {
       OpCode.opMove => val,
+      OpCode.opFloor => val.floor(),
+      OpCode.opCeil => val.ceil(),
       OpCode.opAbs => val.abs(),
       _ => throw StateError('Should not reach here')
     };
@@ -135,10 +144,14 @@ class Vm {
 
     registers[dest] = switch(opCode) {
       OpCode.opAdd => val1 + val2,
+      OpCode.opAnd => (val1 as int) & (val2 as int),
       OpCode.opSubtract => val1 - val2,
       OpCode.opMultiply => val1 * val2,
       OpCode.opDivide => val1 / val2,
+      OpCode.opMax => math.max(val1, val2),
+      OpCode.opMin => math.min(val1, val2),
       OpCode.opMod => (val1 - (val2 * (val1 / val2).floor())),
+      OpCode.opOr => (val1 as int) | (val2 as int),
       OpCode.opStoreEq => val1 == val2 ? 1 : 0,
       OpCode.opStoreNotEq => val1 != val2 ? 1 : 0,
       OpCode.opStoreGt => val1 > val2 ? 1 : 0,

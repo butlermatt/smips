@@ -196,5 +196,99 @@ void main() {
       expect(s.chunk.data![6], equals(OpCode.opConstant.index));
       expect(s.chunk.data![7], equals(1));
     });
+
+    test('Store Less Than', () {
+      var input = 'move r0 5\nslt r1 r0 10';
+      var expected = [OpCode.opMove.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 5,
+              OpCode.opStoreLt.index, OpCode.opConstant.index, 1, OpCode.opRegister.index, OpCode.opConstant.index, 0,
+              OpCode.opConstant.index, 10];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data!.length, equals(expected.length));
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Or bitwise', () {
+      var input = 'or r0 1 2';
+      var expected = [OpCode.opOr.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 1, OpCode.opConstant.index, 2];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data!.length, equals(expected.length));
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('And bitwise', () {
+      var input = 'and r0 1 2';
+      var expected = [OpCode.opAnd.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 1, OpCode.opConstant.index, 2];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data!.length, equals(expected.length));
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Absolute value', () {
+      var input = 'abs r0 10\nabs r1 -10';
+      var expected = [OpCode.opAbs.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 10,
+      OpCode.opAbs.index, OpCode.opConstant.index, 1, OpCode.opConstant.index, 18];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Ceiling value', () {
+      var input = 'ceil r0 10.2';
+      var expected = [OpCode.opCeil.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 18];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Floor value', () {
+      var input = 'floor r0 10.2';
+      var expected = [OpCode.opFloor.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 18];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Min value',  () {
+      var input = 'min r0 1 2';
+      var expected = [OpCode.opMin.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 1, OpCode.opConstant.index, 2];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Max value',  () {
+      var input = 'max r0 1 2';
+      var expected = [OpCode.opMax.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 1, OpCode.opConstant.index, 2];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
   });
 }

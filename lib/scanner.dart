@@ -44,6 +44,19 @@ class Scanner {
     switch (keyword) {
       case 'alias':
         _parseAlias(words.sublist(1));
+      case 'abs':
+        chunk.writeCode(OpCode.opAbs, curLine - 1);
+        _parseRegister(words[1].trim());
+        _parseValue(words[2].trim());
+        break;
+      case 'ceil':
+        chunk.writeCode(OpCode.opCeil, curLine - 1);
+        _parseRegister(words[1].trim());
+        _parseValue(words[2].trim());
+      case 'floor':
+        chunk.writeCode(OpCode.opFloor, curLine - 1);
+        _parseRegister(words[1].trim());
+        _parseValue(words[2].trim());
       case 'define':
         chunk.writeCode(OpCode.opNop, curLine - 1);
         _parseDefine(words.sublist(1));
@@ -56,8 +69,26 @@ class Scanner {
         chunk.writeCode(OpCode.opAdd, curLine - 1);
         _parseRegValueValue(words.sublist(1));
         break;
+      case 'and':
+        chunk.writeCode(OpCode.opAnd, curLine - 1);
+        _parseRegValueValue(words.sublist(1));
+      case 'or':
+        chunk.writeCode(OpCode.opOr, curLine - 1);
+        _parseRegValueValue(words.sublist(1));
       case 'sgt':
         chunk.writeCode(OpCode.opStoreGt, curLine - 1);
+        _parseRegValueValue(words.sublist(1));
+        break;
+      case 'slt':
+        chunk.writeCode(OpCode.opStoreLt, curLine - 1);
+        _parseRegValueValue(words.sublist(1));
+        break;
+      case 'max':
+        chunk.writeCode(OpCode.opMax, curLine - 1);
+        _parseRegValueValue(words.sublist(1));
+        break;
+      case 'min':
+        chunk.writeCode(OpCode.opMin, curLine - 1);
         _parseRegValueValue(words.sublist(1));
         break;
     }
