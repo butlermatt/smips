@@ -42,8 +42,16 @@ class Scanner {
     var keyword = words[0].trim();
 
     switch (keyword) {
+      case 'yield':
+        chunk.writeCode(OpCode.opYield, curLine - 1);
+        break;
       case 'alias':
         _parseAlias(words.sublist(1));
+        break;
+      case 'rand':
+        chunk.writeCode(OpCode.opRand, curLine - 1);
+        _parseRegister(words[1].trim());
+        break;
       case 'abs':
         chunk.writeCode(OpCode.opAbs, curLine - 1);
         _parseRegister(words[1].trim());
@@ -53,10 +61,12 @@ class Scanner {
         chunk.writeCode(OpCode.opCeil, curLine - 1);
         _parseRegister(words[1].trim());
         _parseValue(words[2].trim());
+        break;
       case 'floor':
         chunk.writeCode(OpCode.opFloor, curLine - 1);
         _parseRegister(words[1].trim());
         _parseValue(words[2].trim());
+        break;
       case 'define':
         chunk.writeCode(OpCode.opNop, curLine - 1);
         _parseDefine(words.sublist(1));
@@ -65,6 +75,18 @@ class Scanner {
         chunk.writeCode(OpCode.opMove, curLine - 1);
         _parseRegister(words[1].trim());
         _parseValue(words[2].trim());
+        break;
+      case 'not':
+        chunk.writeCode(OpCode.opNot, curLine - 1);
+        _parseRegister(words[1].trim());
+        _parseValue(words[2].trim());
+        break;
+      case 'trunc':
+        chunk.writeCode(OpCode.opTrunc, curLine - 1);
+        _parseRegister(words[1].trim());
+        _parseValue(words[2].trim());
+        break;
+      // Two argument functions
       case 'add':
         chunk.writeCode(OpCode.opAdd, curLine - 1);
         _parseRegValueValue(words.sublist(1));
@@ -72,9 +94,15 @@ class Scanner {
       case 'and':
         chunk.writeCode(OpCode.opAnd, curLine - 1);
         _parseRegValueValue(words.sublist(1));
+        break;
+      case 'div':
+        chunk.writeCode(OpCode.opDivide, curLine - 1);
+        _parseRegValueValue(words.sublist(1));
+        break;
       case 'or':
         chunk.writeCode(OpCode.opOr, curLine - 1);
         _parseRegValueValue(words.sublist(1));
+        break;
       case 'sgt':
         chunk.writeCode(OpCode.opStoreGt, curLine - 1);
         _parseRegValueValue(words.sublist(1));
@@ -89,6 +117,26 @@ class Scanner {
         break;
       case 'min':
         chunk.writeCode(OpCode.opMin, curLine - 1);
+        _parseRegValueValue(words.sublist(1));
+        break;
+      case 'mod':
+        chunk.writeCode(OpCode.opMod, curLine - 1);
+        _parseRegValueValue(words.sublist(1));
+        break;
+      case 'mul':
+        chunk.writeCode(OpCode.opMultiply, curLine - 1);
+        _parseRegValueValue(words.sublist(1));
+        break;
+      case 'nor':
+        chunk.writeCode(OpCode.opNor, curLine - 1);
+        _parseRegValueValue(words.sublist(1));
+        break;
+      case 'sub':
+        chunk.writeCode(OpCode.opSubtract, curLine - 1);
+        _parseRegValueValue(words.sublist(1));
+        break;
+      case 'xor':
+        chunk.writeCode(OpCode.opXor, curLine - 1);
         _parseRegValueValue(words.sublist(1));
         break;
     }

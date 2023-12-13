@@ -9,6 +9,8 @@ enum OpCode {
   opCeil,
   opFloor,
   opMove,
+  opNot,
+  opTrunc,
   // Dual Operand
   opAdd,
   opAnd,
@@ -18,11 +20,13 @@ enum OpCode {
   opMin,
   opMultiply,
   opMod,
+  opNor,
   opOr,
   opStoreGt,
   opStoreLt,
   opStoreEq,
   opStoreNotEq,
+  opXor,
   // Aliases
   opSetAlias, // opCode AliasSlot Value(Register | Constant)
   opGetAlias, // opCode AliasSlot
@@ -38,6 +42,7 @@ enum OpCode {
   opConstant,
   opDevice,
   opRegister,
+  opYield,
 }
 
 typedef Position = (int line, int char);

@@ -32,12 +32,18 @@ class Vm {
       var inst = readOpcode();
       switch (inst) {
         // Used to help manage empty lines
+        case OpCode.opYield:
         case OpCode.opNop: continue;
+        case OpCode.opRand:
+          var dest = readDestRegistry();
+          registers[dest] = math.Random().nextDouble();
         // Single Operand commands
         case OpCode.opAbs:
         case OpCode.opCeil:
         case OpCode.opFloor:
         case OpCode.opMove:
+        case OpCode.opNot:
+        case OpCode.opTrunc:
           handleSingleOp(inst);
         // Dual Operand Commands
         case OpCode.opAdd:
@@ -48,11 +54,13 @@ class Vm {
         case OpCode.opMod:
         case OpCode.opMax:
         case OpCode.opMin:
+        case OpCode.opNor:
         case OpCode.opOr:
         case OpCode.opStoreEq:
         case OpCode.opStoreNotEq:
         case OpCode.opStoreGt:
         case OpCode.opStoreLt:
+        case OpCode.opXor:
           handleBinaryOp(inst);
           break;
         case OpCode.opSetAlias:
@@ -129,10 +137,12 @@ class Vm {
     var val = readValue();
 
     registers[dest] = switch(opCode) {
-      OpCode.opMove => val,
-      OpCode.opFloor => val.floor(),
-      OpCode.opCeil => val.ceil(),
       OpCode.opAbs => val.abs(),
+      OpCode.opCeil => val.ceil(),
+      OpCode.opFloor => val.floor(),
+      OpCode.opMove => val,
+      OpCode.opNot => ~(val as int),
+      OpCode.opTrunc => val.truncate(),
       _ => throw StateError('Should not reach here')
     };
   }
@@ -151,11 +161,13 @@ class Vm {
       OpCode.opMax => math.max(val1, val2),
       OpCode.opMin => math.min(val1, val2),
       OpCode.opMod => (val1 - (val2 * (val1 / val2).floor())),
+      OpCode.opNor => ~((val1 as int) | (val2 as int)),
       OpCode.opOr => (val1 as int) | (val2 as int),
       OpCode.opStoreEq => val1 == val2 ? 1 : 0,
       OpCode.opStoreNotEq => val1 != val2 ? 1 : 0,
       OpCode.opStoreGt => val1 > val2 ? 1 : 0,
       OpCode.opStoreLt => val1 < val2 ? 1 : 0,
+      OpCode.opXor => (val1 as int) ^ (val2 as int),
       _ => throw StateError("Don't get here"),
     };
   }

@@ -75,7 +75,18 @@ void main() {
       expect(s.chunk.data![5], equals(18));
     });
 
-    test('Set Alias', () {
+    test('Yield', () {
+      var input = 'yield';
+      var expected = <int>[OpCode.opYield.index];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Set register Alias', () {
       var input = 'alias test r1';
 
       var s = Scanner(input);
@@ -92,7 +103,19 @@ void main() {
       expect(s.chunk.data![4], equals(1));
     });
 
-    test('Get Alias', () {
+    test('Set device Alias', () {
+      var input = 'alias test d0';
+      var expected = <int>[OpCode.opSetAlias.index, 0, OpCode.opDevice.index, OpCode.opConstant.index, 0];
+
+      var s = Scanner(input);
+      s.scanInstruction();
+
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Get register Alias', () {
       var input = 'alias Test r15\nmove Test 500';
 
       var s = Scanner(input);
@@ -211,18 +234,6 @@ void main() {
       expect(s.chunk.data, equals(expected));
     });
 
-    test('Or bitwise', () {
-      var input = 'or r0 1 2';
-      var expected = [OpCode.opOr.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 1, OpCode.opConstant.index, 2];
-
-      var s = Scanner(input);
-      s.compile();
-      s.chunk.take();
-
-      expect(s.chunk.data!.length, equals(expected.length));
-      expect(s.chunk.data, equals(expected));
-    });
-
     test('And bitwise', () {
       var input = 'and r0 1 2';
       var expected = [OpCode.opAnd.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 1, OpCode.opConstant.index, 2];
@@ -269,6 +280,50 @@ void main() {
       expect(s.chunk.data, equals(expected));
     });
 
+    test('Not bitwise', () {
+      var input = 'not r0 4';
+      var expected = [OpCode.opNot.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 4];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Random number', () {
+      var input = 'rand r0';
+      var expected = [OpCode.opRand.index, OpCode.opConstant.index, 0];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Truncate value', () {
+      var input = 'trunc r0 34.238';
+      var expected = [OpCode.opTrunc.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 18];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Divide value', () {
+      var input = 'div r0 4 2';
+      var expected = [OpCode.opDivide.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 4, OpCode.opConstant.index, 2];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
     test('Min value',  () {
       var input = 'min r0 1 2';
       var expected = [OpCode.opMin.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 1, OpCode.opConstant.index, 2];
@@ -283,6 +338,73 @@ void main() {
     test('Max value',  () {
       var input = 'max r0 1 2';
       var expected = [OpCode.opMax.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 1, OpCode.opConstant.index, 2];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Mod value', () {
+      var input = 'mod r0 19 12';
+      var expected = [OpCode.opMod.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 18, OpCode.opConstant.index, 12];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Multiply value', () {
+      var input = 'mul r0 4 2';
+      var expected = [OpCode.opMultiply.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 4, OpCode.opConstant.index, 2];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Nor bitwise', () {
+      var input = 'nor r0 5 3';
+      var expected = <int>[OpCode.opNor.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 5, OpCode.opConstant.index, 3];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Or bitwise', () {
+      var input = 'or r0 1 2';
+      var expected = [OpCode.opOr.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 1, OpCode.opConstant.index, 2];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data!.length, equals(expected.length));
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Subtract value', () {
+      var input = 'sub r0 2 1';
+      var expected = [OpCode.opSubtract.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 2, OpCode.opConstant.index, 1];
+
+      var s = Scanner(input);
+      s.compile();
+      s.chunk.take();
+
+      expect(s.chunk.data, equals(expected));
+    });
+
+    test('Xor Value (exclusive or)', () {
+      var input = 'xor r0 5 3';
+      var expected = [OpCode.opXor.index, OpCode.opConstant.index, 0, OpCode.opConstant.index, 5, OpCode.opConstant.index, 3];
 
       var s = Scanner(input);
       s.compile();

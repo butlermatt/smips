@@ -343,6 +343,39 @@ void main() {
       expect(vm.registers[15], equals(500));
     });
 
+    test('Random Number', () {
+      var input = 'rand r0';
+      var scanner = Scanner(input);
+
+      scanner.compile();
+      var vm = Vm();
+      vm.interpret(scanner.chunk);
+
+      expect(vm.registers[0], allOf(greaterThanOrEqualTo(0), lessThan(1)));
+    });
+
+    test('Not bitwise', () {
+      var input = 'not r0 4';
+      var scanner = Scanner(input);
+
+      scanner.compile();
+      var vm = Vm();
+      vm.interpret(scanner.chunk);
+
+      expect(vm.registers[0], equals(-5));
+    });
+
+    test('Truncate value', () {
+      var input = 'trunc r0 34.238';
+      var scanner = Scanner(input);
+
+      scanner.compile();
+      var vm = Vm();
+      vm.interpret(scanner.chunk);
+
+      expect(vm.registers[0], equals(34));
+    });
+
     test('Store Greater Than', () {
       var input = 'move r0 5\nsgt r1 r0 10\nsgt r2 r0 1';
       var scanner = Scanner(input);
@@ -367,17 +400,6 @@ void main() {
       expect(vm.registers[0], 5);
       expect(vm.registers[1], 1);
       expect(vm.registers[2], 0);
-    });
-
-    test('Or bitwise', () {
-      var input = 'or r0 1 2';
-      var scanner = Scanner(input);
-
-      scanner.compile();
-      var vm = Vm();
-      vm.interpret(scanner.chunk);
-
-      expect(vm.registers[0], equals(3));
     });
 
     test('And bitwise', () {
@@ -450,6 +472,39 @@ void main() {
 
       expect(vm.registers[0], equals(1));
       expect(vm.registers[1], equals(-2));
+    });
+
+    test('Nor bitwise', () {
+      var input = 'nor r0 5 3';
+      var scanner = Scanner(input);
+
+      scanner.compile();
+      var vm = Vm();
+      vm.interpret(scanner.chunk);
+
+      expect(vm.registers[0], equals(-8)); // FIXME: Check for unsigned results
+    });
+
+    test('Or bitwise', () {
+      var input = 'or r0 1 2';
+      var scanner = Scanner(input);
+
+      scanner.compile();
+      var vm = Vm();
+      vm.interpret(scanner.chunk);
+
+      expect(vm.registers[0], equals(3));
+    });
+
+    test('Xor value', () {
+      var input = 'xor r0 5 3';
+      var scanner = Scanner(input);
+
+      scanner.compile();
+      var vm = Vm();
+      vm.interpret(scanner.chunk);
+
+      expect(vm.registers[0], equals(6));
     });
   });
 }
